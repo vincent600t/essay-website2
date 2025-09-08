@@ -7,16 +7,31 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // Later: call backend API
-    alert(`Registering user: ${name} (${email})`);
+    setError("");
+
+    try {
+      const res = await axios.post(
+        "https://your-backend.onrender.com/api/auth/register",
+        { name, email, password }
+      );
+
+      localStorage.setItem("token", res.data.token);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed");
+    }
   };
 
   return (
@@ -25,6 +40,11 @@ export default function Register() {
         <Typography variant="h4" align="center" fontWeight="bold" gutterBottom>
           Register
         </Typography>
+        {error && (
+          <Typography color="error" align="center">
+            {error}
+          </Typography>
+        )}
         <Box component="form" onSubmit={handleRegister} sx={{ mt: 3 }}>
           <TextField
             fullWidth
